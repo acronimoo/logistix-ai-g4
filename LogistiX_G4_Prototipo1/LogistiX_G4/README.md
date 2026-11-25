@@ -1,39 +1,292 @@
-# LogistiX AI — G4 / Prototipo 1
+# LogistiX AI — G4 | Prototipo 1
 
-Evaluación N.º 4 de IA: clasificación binaria de errores de packing y probabilidad estimada. El predictor de atraso no forma parte del alcance.
+## Sistema predictivo de errores de packing
 
-## 1. Entrenamiento en Google Colab (requisito docente)
-1. Abrir `LogistiX_Entrenamiento.ipynb` en Google Colab.
-2. Ejecutar las celdas en orden y cargar `LogistiX.xlsx` cuando se solicite.
-3. Descargar `artefactos.zip` desde la última celda y reemplazar los archivos de la carpeta local `artefactos` por los recién generados. Mantener los tres archivos juntos.
-4. Revisar métricas, matriz de confusión y explicación del umbral antes de la exposición.
+Evaluación N.º 4 — Inteligencia Artificial  
+Ingeniería en Informática | INACAP  
+Grupo 4 | 2026
 
-El notebook se entrega preparado para Colab, pero no se ha ejecutado en ese servicio; el entrenamiento equivalente se ejecutó localmente en el entorno de creación. Se incluyen los artefactos obtenidos de ese entrenamiento.
+[![Abrir en Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/acronimoo/logistix-ai-g4/blob/main/LogistiX_G4_Prototipo1/LogistiX_G4/LogistiX_Entrenamiento.ipynb)
 
-## 2. Ejecutar la aplicación localmente (Windows PowerShell)
-Desde la carpeta extraída, con Python 3.11–3.13 de 64 bits (entorno de prueba: 3.13.5):
+## 1. Descripción del proyecto
+
+LogistiX es una empresa de logística y distribución que presenta errores durante la preparación de pedidos.
+
+Este proyecto implementa un prototipo de inteligencia artificial mediante XGBoost, capaz de generar alertas de riesgo antes de iniciar el proceso de packing.
+
+La solución permite ingresar las características de un pedido mediante una interfaz web desarrollada con Gradio y obtener:
+
+- Clasificación binaria: Sí/No.
+- Probabilidad estimada de error.
+- Probabilidad estimada sin error.
+- Recomendación de revisión del pedido.
+- Validación de los datos ingresados.
+
+La predicción de entregas atrasadas no forma parte del alcance.
+
+## 2. Objetivo general
+
+Desarrollar un prototipo predictivo que permita identificar el riesgo de errores durante la preparación de pedidos, utilizando técnicas de Machine Learning y prácticas de gestión del ciclo de vida del modelo mediante MLOps.
+
+## 3. Tecnologías utilizadas
+
+| Tecnología | Versión | Propósito |
+|---|---|---|
+| Python | 3.13.18 | Lenguaje de programación |
+| Google Colab | Cloud | Entrenamiento y evaluación |
+| Pandas | 2.2.3 | Procesamiento de datos |
+| NumPy | 2.4.6 | Operaciones numéricas |
+| Scikit-learn | 1.6.1 | Preprocesamiento y evaluación |
+| XGBoost | 3.4.1 | Clasificación predictiva |
+| Joblib | 1.5.3 | Persistencia del modelo |
+| OpenPyXL | 3.1.5 | Lectura de archivos Excel |
+| Gradio | 6.5.1 | Interfaz web |
+| GitHub | Cloud | Repositorio y versionamiento |
+
+## 4. Dataset
+
+El archivo LogistiX.xlsx fue proporcionado para la evaluación académica.
+
+| Característica | Resultado |
+|---|---:|
+| Registros | 1200 |
+| Columnas originales | 9 |
+| Valores nulos | 0 |
+| Filas duplicadas | 0 |
+| Pedidos sin error | 958 |
+| Pedidos con error | 242 |
+| Proporción de errores | 20,17 % |
+
+### Variable objetivo
+
+error_preparacion:
+
+- 0: Pedido sin error.
+- 1: Pedido con error.
+
+### Variables predictoras
+
+| Variable | Descripción | Rango observado |
+|---|---|---|
+| unidades | Cantidad de unidades | 1–120 |
+| carga_bodega_pct | Porcentaje de carga de bodega | 45–100 |
+| stock_disponible | Inventario disponible | 0–250 |
+| prioridad | Prioridad del pedido | Normal, Alta, Urgente |
+
+### Variables descartadas
+
+| Variable | Justificación |
+|---|---|
+| pedido_id | Identificador único del pedido |
+| distancia_km | Variable principalmente asociada al transporte |
+| tiempo_picking_min | Duración desconocida antes de iniciar la preparación |
+| entrega_atrasada | Resultado posterior y objetivo de otro prototipo |
+
+La selección responde al alcance preventivo de la solución y no implica que las variables descartadas carezcan necesariamente de asociación estadística.
+
+## 5. Arquitectura de la solución
+
+```mermaid
+flowchart TD
+    A[GitHub: dataset y código fuente] --> B[Google Colab]
+    B --> C[Exploración y selección de variables]
+    C --> D[Preprocesamiento]
+    D --> E[Entrenamiento XGBoost]
+    E --> F[Validación y evaluación]
+    F --> G[Pipeline Joblib]
+    G --> H[Aplicación Gradio]
+    A --> H
+    I[Usuario final] --> H
+    H --> J[Predicción y probabilidad estimada]
+    G --> K[Artefactos versionados en GitHub]
+```
+
+## 6. Entrenamiento del modelo
+
+El entrenamiento se realizó en Google Colab utilizando XGBClassifier.
+
+Se aplicó una partición estratificada:
+
+| Conjunto | Porcentaje | Registros |
+|---|---:|---:|
+| Entrenamiento | 60 % | 720 |
+| Validación | 20 % | 240 |
+| Prueba | 20 % | 240 |
+
+La variable categórica prioridad se transforma mediante OneHotEncoder.
+
+El preprocesamiento y el clasificador se integran en un Pipeline para mantener la consistencia entre entrenamiento y predicción.
+
+Se utiliza una semilla de 42 para favorecer la reproducibilidad.
+
+El umbral de clasificación de 0,10 se seleccionó mediante F2-Score sobre el conjunto de validación, priorizando la detección de errores.
+
+## 7. Resultados del modelo
+
+Resultados obtenidos en Google Colab sobre el conjunto de prueba.
+
+| Métrica | Resultado |
+|---|---:|
+| Accuracy | 28,75 % |
+| Precision | 20,00 % |
+| Recall | 85,42 % |
+| F1-Score | 32,41 % |
+| F2-Score | 51,64 % |
+| ROC-AUC | 0,5103 |
+| Average Precision | 0,2443 |
+| Umbral de clasificación | 10,00 % |
+
+### Matriz de confusión
+
+| Clase real / Predicción | Sin error | Con error |
+|---|---:|---:|
+| Sin error | 28 | 164 |
+| Con error | 7 | 41 |
+
+El modelo detectó 41 de los 48 errores reales presentes en el conjunto de prueba.
+
+Sin embargo, el elevado número de falsos positivos y el ROC-AUC cercano a 0,5 evidencian una capacidad discriminativa limitada.
+
+Un clasificador que siempre predijera ausencia de error alcanzaría un Accuracy del 80 %, pero no detectaría ningún error.
+
+El prototipo tiene un propósito experimental y académico. No se recomienda utilizarlo como criterio único de decisión operacional.
+
+## 8. Ejecución desde Google Colab
+
+1. Presionar el botón Abrir en Google Colab.
+2. Ejecutar la instalación de dependencias.
+3. Reiniciar la sesión si Colab lo solicita.
+4. Ejecutar las secciones restantes en orden.
+5. El dataset se descarga automáticamente desde GitHub.
+6. Entrenar y evaluar el modelo.
+7. Generar los artefactos del entrenamiento.
+8. Ejecutar las pruebas de integración.
+9. Ejecutar la última celda para iniciar Gradio.
+10. Abrir el enlace público temporal generado.
+
+El enlace de Gradio depende de la sesión de ejecución de Colab y no constituye un alojamiento permanente.
+
+Utilizar únicamente datos de prueba en la demostración pública.
+
+## 9. Ejecución local
+
+Desde la carpeta que contiene app.py, utilizando PowerShell y un entorno Python compatible con las dependencias:
 
 ```powershell
 py -m venv .venv
+
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
 .\.venv\Scripts\python.exe app.py
 ```
-Abrir la dirección que aparece en la consola (habitualmente http://127.0.0.1:7860). Para detener: Ctrl+C.
 
-Si prefieres entrenar localmente: `.\.venv\Scripts\python.exe entrenar.py`.
-Para pruebas de integración: `.\.venv\Scripts\python.exe -m unittest test_app -v`.
+Abrir en el navegador:
 
-## 3. Decisiones y evidencia
-- Objetivo: `error_preparacion` (0 = no, 1 = sí).
-- Predictoras: unidades, carga de bodega, stock disponible y prioridad. Se define la predicción antes de iniciar la preparación. Se elimina `pedido_id` (identificador), `distancia_km` (más asociada al transporte y sin justificación causal directa para packing), `tiempo_picking_min` (duración observada que aún no se conoce al inicio) y `entrega_atrasada` (resultado posterior y objetivo de otro prototipo). Las decisiones son de diseño; no afirman que las variables eliminadas no tengan asociación estadística.
-- El dataset tiene 1.200 registros, 0 nulos, 0 filas duplicadas, 242 errores y 958 sin errores. Partición estratificada 60/20/20 (720/240/240). Prioridad se transforma con OneHotEncoder. Pipeline conserva preprocesamiento y XGBoost juntos; evita inconsistencias y ajuste del preprocesamiento con datos de test.
-- Umbral de alerta 0,10, elegido por F2 en validación entre 0,10 y 0,80 con incrementos de 0,05. F2 enfatiza recall. En prueba: ROC-AUC 0,524; recall 87,50%; precisión 20,49%; exactitud 29,58%; 42 VP, 163 FP, 6 FN y 29 VN. Exactitud con umbral 0,50: 80,42%, recall 4,17%. Baseline sin errores: 80% de exactitud y 0% recall en test. La capacidad discriminativa es baja; no recomendar el uso productivo. El umbral es experimental, no un umbral óptimo de negocio, y los porcentajes no están calibrados.
-- Dos limitaciones para el informe: (1) baja capacidad discriminativa y alto costo potencial de falsas alertas, (2) tamaño/cobertura limitados del dataset, sin fecha ni variables operacionales como experiencia del preparador, complejidad SKU y turno, que impiden comprobar generalización temporal y a otras bodegas.
+http://127.0.0.1:7860
 
-## 4. MLOps
-Implementado: código reproducible, semilla, hash SHA-256 del dataset, registro de versiones, métricas y esquema de entrada, persistencia del pipeline, validación y pruebas unitarias. `artefactos/metricas.json` contiene resultados reproducibles del modelo. Propuesto para producción: Git y CI, revisión de nuevas versiones antes del despliegue, control de acceso, captura de resultados reales, monitoreo de drift y de recall/precisión por período, reentrenamiento evaluado y rollback a una versión aprobada. No se afirma que estas prácticas propuestas ya estén implementadas.
+Para detener el servidor, utilizar Ctrl+C.
 
-## 5. Entregables pendientes de completar por el equipo
-Informe técnico (formato vertical oficial INACAP 60 años, extensión sugerida 6–10 páginas sin portada, conclusiones y referencias) y presentación de máximo 7 diapositivas. Usar resultados reales de la corrida de Colab. No se incluyen aquí la plantilla institucional ni la presentación.
+La ejecución local debe comprobarse con las versiones actualizadas de las dependencias. El entorno verificado para esta entrega es Google Colab.
 
-Fuentes: Evaluación N.º 4 de IA y LogistiX.xlsx entregados por el docente. Para fundamentar las herramientas, consultar documentación oficial: https://xgboost.readthedocs.io/ ; https://scikit-learn.org/stable/ ; https://www.gradio.app/docs ; https://colab.research.google.com/ .
+## 10. Pruebas funcionales
+
+| ID | Unidades | Carga | Stock | Prioridad | Resultado | Estado |
+|---|---:|---:|---:|---|---|---|
+| PF-01 | 23 | 94 % | 117 | Alta | Sí, 11,19 % | Aprobado |
+| PF-02 | 37 | 71 % | 219 | Urgente | No, 8,79 % | Aprobado |
+| PF-03 | 113 | 47 % | 158 | Urgente | Sí, 11,73 % | Aprobado |
+| PF-04 | 150 | 47 % | 158 | Urgente | Entrada rechazada | Aprobado |
+
+Las cuatro pruebas funcionales fueron satisfactorias.
+
+La cuarta prueba comprueba que el sistema rechaza cantidades superiores al máximo observado de 120 unidades.
+
+El cumplimiento funcional de estas pruebas no representa la exactitud predictiva del modelo.
+
+### Prueba de integración
+
+Se comparó la predicción obtenida directamente mediante el Pipeline con la predicción generada por la aplicación web.
+
+Resultado:
+
+- Probabilidad del modelo: 11,19 %.
+- Probabilidad de la aplicación: 11,19 %.
+- Clasificación: Sí.
+- Estado: Prueba exitosa.
+
+## 11. Gestión del ciclo de vida — MLOps
+
+### Prácticas implementadas
+
+- Control de versiones mediante GitHub.
+- Entrenamiento reproducible mediante Google Colab.
+- Registro de versiones de dependencias.
+- Separación de entrenamiento, validación y prueba.
+- Persistencia del modelo y preprocesamiento.
+- Registro de métricas de evaluación.
+- Identificación del dataset mediante SHA-256.
+- Validación de entradas.
+- Pruebas funcionales y de integración.
+- Versionamiento de artefactos del modelo.
+
+### Prácticas propuestas para producción
+
+- Automatización CI/CD.
+- Monitoreo de rendimiento predictivo.
+- Detección de Data Drift.
+- Registro de errores reales de packing.
+- Reentrenamiento periódico.
+- Control de acceso.
+- Validación de nuevas versiones antes de desplegar.
+- Rollback del modelo.
+
+Estas prácticas propuestas no se encuentran implementadas en el alcance actual.
+
+## 12. Limitaciones
+
+### Limitación 1: capacidad predictiva reducida
+
+El ROC-AUC de 0,5103 evidencia una capacidad discriminativa cercana al azar.
+
+Aunque el umbral permite detectar una proporción elevada de errores, también genera numerosas falsas alertas, lo que podría aumentar la carga de revisión operacional.
+
+Las probabilidades estimadas no han sido calibradas.
+
+### Limitación 2: disponibilidad de datos
+
+El dataset posee 1200 registros y no incluye variables relevantes como experiencia del preparador, complejidad del pedido, cantidad de SKU diferentes, turno laboral o historial temporal.
+
+Esto limita la generalización del modelo y la posibilidad de validar su comportamiento en distintos períodos y bodegas.
+
+## 13. Estructura del proyecto
+
+```text
+LogistiX_G4/
+├── LogistiX_Entrenamiento.ipynb
+├── LogistiX.xlsx
+├── app.py
+├── entrenar.py
+├── test_app.py
+├── requirements.txt
+├── README.md
+└── artefactos/
+    ├── pipeline.joblib
+    ├── metricas.json
+    └── esquema.json
+```
+
+## 14. Referencias
+
+- XGBoost: https://xgboost.readthedocs.io/
+- Scikit-learn: https://scikit-learn.org/stable/
+- Gradio: https://www.gradio.app/docs
+- Google Colab: https://colab.research.google.com/
+- GitHub: https://docs.github.com/
+- Pauta Evaluación N.º 4 de Inteligencia Artificial, INACAP.
+- Dataset LogistiX.xlsx proporcionado para la evaluación.
+
+---
+
+Proyecto académico — Grupo 4  
+Ingeniería en Informática | INACAP | 2026  
+Versión del modelo: 1.0.0

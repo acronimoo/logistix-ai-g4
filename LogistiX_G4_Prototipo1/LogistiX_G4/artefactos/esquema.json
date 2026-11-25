@@ -1,0 +1,32 @@
+{
+  "variables": [
+    "unidades",
+    "carga_bodega_pct",
+    "stock_disponible",
+    "prioridad"
+  ],
+  "numericas": {
+    "unidades": {
+      "min": 1,
+      "max": 120,
+      "mediana": 59
+    },
+    "carga_bodega_pct": {
+      "min": 45,
+      "max": 100,
+      "mediana": 73
+    },
+    "stock_disponible": {
+      "min": 0,
+      "max": 250,
+      "mediana": 117
+    }
+  },
+  "prioridades": [
+    "Alta",
+    "Normal",
+    "Urgente"
+  ],
+  "umbral": 0.1,
+  "version": "1.0.0"
+}

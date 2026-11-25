@@ -1,0 +1,97 @@
+{
+  "modelo_version": "1.0.0",
+  "semilla": 42,
+  "dataset_sha256": "7c0bd37d41d872aaa99ca0a284ab3fa689d961a8c0e674f41d98a2edf08ba718",
+  "filas": 1200,
+  "nulos": 0,
+  "duplicados_filas": 0,
+  "clases": {
+    "0": 958,
+    "1": 242
+  },
+  "particiones": {
+    "entrenamiento": 720,
+    "validacion": 240,
+    "prueba": 240
+  },
+  "variables": [
+    "unidades",
+    "carga_bodega_pct",
+    "stock_disponible",
+    "prioridad"
+  ],
+  "objetivo": "error_preparacion",
+  "umbral": 0.1,
+  "validacion_umbral": {
+    "umbral": 0.1,
+    "accuracy": 0.3458333333333333,
+    "precision": 0.22727272727272727,
+    "recall": 0.9183673469387755,
+    "f1": 0.3643724696356275,
+    "f2": 0.5710659898477157,
+    "roc_auc": 0.6243188374826371,
+    "average_precision": 0.3178031409195422,
+    "brier": 0.15801262158763732,
+    "matriz_confusion": [
+      [
+        38,
+        153
+      ],
+      [
+        4,
+        45
+      ]
+    ]
+  },
+  "prueba_umbral": {
+    "umbral": 0.1,
+    "accuracy": 0.2875,
+    "precision": 0.2,
+    "recall": 0.8541666666666666,
+    "f1": 0.3241106719367589,
+    "f2": 0.5163727959697733,
+    "roc_auc": 0.5103081597222222,
+    "average_precision": 0.24434205614648613,
+    "brier": 0.16613332855944563,
+    "matriz_confusion": [
+      [
+        28,
+        164
+      ],
+      [
+        7,
+        41
+      ]
+    ]
+  },
+  "prueba_05": {
+    "umbral": 0.5,
+    "accuracy": 0.7958333333333333,
+    "precision": 0.3333333333333333,
+    "recall": 0.020833333333333332,
+    "f1": 0.0392156862745098,
+    "f2": 0.02564102564102564,
+    "roc_auc": 0.5103081597222222,
+    "average_precision": 0.24434205614648613,
+    "brier": 0.16613332855944563,
+    "matriz_confusion": [
+      [
+        190,
+        2
+      ],
+      [
+        47,
+        1
+      ]
+    ]
+  },
+  "baseline_accuracy": 0.8,
+  "baseline_recall": 0.0,
+  "versiones": {
+    "python": "3.13.18",
+    "sklearn": "1.6.1",
+    "xgboost": "3.4.1",
+    "pandas": "2.2.3",
+    "numpy": "2.4.6"
+  }
+}
